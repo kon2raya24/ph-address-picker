@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-28
+
+### Added
+
+- **Barangay level** — the 4th cascade step, lazy-loaded per city.
+  - New data-only package **`@ph-dev-utils/address-data`** (v0.1.0): per-city barangay chunks `barangays/<cityMunCode>.json` (1,634 files, 42,046 barangays, PSA Q4 2024 PSGC). Served via the jsDelivr CDN — **not** a code dependency, never enters the consumer bundle.
+  - **`@ph-dev-utils/address-core`** (0.2.0): `createJsDelivrFetcher({ baseUrl?, dataVersion? })` + async barangay loading in the store (`barangayStatus: idle→loading→ready/error`, race-guarded + in-memory cached). `selectBarangay()` is now functional; new `withBarangay` reducer + `DATA_VERSION` export.
+  - **`@ph-dev-utils/address-react`** (0.2.0): `<PhAddressPicker showBarangay />` renders a barangay `<select>` with loading/error states (defaults to the jsDelivr fetcher; override via `fetchBarangays`). `usePhAddress` now returns `selectBarangay`.
+
+### Notes
+
+- Barangay is **opt-in** (`showBarangay`, default false) — v0.1 consumers are unaffected (zero network unless enabled).
+- Barangay is optional (form not blocked); on fetch error the field shows a hint and stays empty.
+- Tests: 17 vitest (core) + 6 (react). address-core's tsconfig adds `lib: ["DOM"]` for `fetch` types (types only).
+
 ## [0.1.0] - 2026-05-28
 
 Initial release. Cascading Philippine address picker for React, built on the `@ph-dev-utils` data packages.

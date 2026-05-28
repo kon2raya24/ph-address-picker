@@ -30,7 +30,8 @@ function Checkout() {
 
 - **Region / province / city** come from `@ph-dev-utils/core` (bundled, ~167 KB, gzips well) — **zero network**.
 - **ZIP autofill** uses a compact `cityMunCode → ZIP[]` map derived from `@ph-dev-utils/postal` at build time.
-- **Headless core + thin React binding** (`useSyncExternalStore`, SSR-safe). The core's state shape + a `Fetcher` interface for **barangay** are already in place — barangay selection lands in **v0.2** (lazy-loaded per city from a CDN, since the full barangay dataset is ~4 MB).
+- **Barangay** — opt-in 4th level (`<PhAddressPicker showBarangay />`), lazy-loaded per city from the jsDelivr CDN (`@ph-dev-utils/address-data`), since the full barangay dataset is ~4 MB. Zero network unless enabled.
+- **Headless core + thin React binding** (`useSyncExternalStore`, SSR-safe).
 
 ## Correctness notes
 

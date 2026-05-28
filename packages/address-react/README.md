@@ -29,7 +29,9 @@ import '@ph-dev-utils/address-react/theme.css'; // optional styled preset
 | `defaultValue` | `{ regionCode?, provinceCode?, cityCode?, zip? }` | — | Uncontrolled seed; `cityCode` alone hydrates the whole cascade |
 | `zipPolicy` | `'first' \| 'none'` | `'first'` | Autofill first candidate ZIP, or leave blank |
 | `showZip` | `boolean` | `true` | Render the ZIP field |
-| `labels` / `placeholders` | `{ region?, province?, city?, zip? }` | English | For i18n / Tagalog |
+| `showBarangay` | `boolean` | `false` | Render the barangay field (lazy-loads per city from jsDelivr) |
+| `fetchBarangays` | `(cityMunCode) => Promise<{code,name}[]>` | jsDelivr | Override the barangay source (self-host / mirror) |
+| `labels` / `placeholders` | `{ region?, province?, city?, barangay?, zip? }` | English | For i18n / Tagalog |
 | `disabled` `required` `id` `className` | — | — | Standard form props |
 
 ### `AddressValue`
@@ -64,7 +66,7 @@ Ships **unstyled** with `.ph-ap*` class names. Import `@ph-dev-utils/address-rea
 
 - **NCR** hides the province step (`province: null` is valid). **Independent cities** (Isabela, Cotabato) are reachable in their region.
 - **Multi-ZIP cities** (Manila ~200, Davao 12): the ZIP is autofilled but editable, with a candidate dropdown when `zipAmbiguous`. ZIP data is community-sourced (GeoNames), not an official PHLPost feed.
-- **Barangay** selection arrives in v0.2 (lazy-loaded per city).
+- **Barangay** (opt-in via `showBarangay`) lazy-loads a city's barangays from the jsDelivr CDN (`@ph-dev-utils/address-data`) — zero network unless enabled; optional, with a loading/error hint.
 
 ## License
 

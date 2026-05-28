@@ -1,10 +1,13 @@
+import { useMemo } from 'react';
 import { usePhAddress } from './usePhAddress.js';
-import type { AddressValue, InitialValue, ZipPolicy } from '@ph-dev-utils/address-core';
+import { createJsDelivrFetcher } from '@ph-dev-utils/address-core';
+import type { AddressValue, Fetcher, InitialValue, ZipPolicy } from '@ph-dev-utils/address-core';
 
 export interface PhAddressLabels {
   region?: string;
   province?: string;
   city?: string;
+  barangay?: string;
   zip?: string;
 }
 
@@ -15,6 +18,10 @@ export interface PhAddressPickerProps {
   zipPolicy?: ZipPolicy;
   /** Show the ZIP field. Default true. */
   showZip?: boolean;
+  /** Show the barangay field (lazy-loads per city). Default false. */
+  showBarangay?: boolean;
+  /** Override the barangay fetcher. Defaults to the jsDelivr CDN when `showBarangay` is on. */
+  fetchBarangays?: Fetcher;
   labels?: PhAddressLabels;
   placeholders?: PhAddressLabels;
   disabled?: boolean;
@@ -28,6 +35,7 @@ const DEFAULT_LABELS: Required<PhAddressLabels> = {
   region: 'Region',
   province: 'Province',
   city: 'City / Municipality',
+  barangay: 'Barangay',
   zip: 'ZIP Code',
 };
 
@@ -35,6 +43,7 @@ const DEFAULT_PLACEHOLDERS: Required<PhAddressLabels> = {
   region: 'Select region…',
   province: 'Select province…',
   city: 'Select city / municipality…',
+  barangay: 'Select barangay…',
   zip: 'ZIP',
 };
 
@@ -44,6 +53,8 @@ export function PhAddressPicker(props: PhAddressPickerProps) {
     onChange,
     zipPolicy,
     showZip = true,
+    showBarangay = false,
+    fetchBarangays,
     labels,
     placeholders,
     disabled = false,
@@ -52,7 +63,12 @@ export function PhAddressPicker(props: PhAddressPickerProps) {
     className,
   } = props;
 
-  const a = usePhAddress({ defaultValue, onChange, zipPolicy });
+  const barangayFetcher = useMemo(
+    () => (showBarangay ? (fetchBarangays ?? createJsDelivrFetcher()) : undefined),
+    [showBarangay, fetchBarangays],
+  );
+
+  const a = usePhAddress({ defaultValue, onChange, zipPolicy, fetchBarangays: barangayFetcher });
   const L = { ...DEFAULT_LABELS, ...labels };
   const P = { ...DEFAULT_PLACEHOLDERS, ...placeholders };
 
@@ -124,6 +140,43 @@ export function PhAddressPicker(props: PhAddressPickerProps) {
           ))}
         </select>
       </div>
+
+      {showBarangay && (
+        <div className="ph-ap__field">
+          <label className="ph-ap__label" htmlFor={fieldId('barangay')}>
+            {L.barangay}
+          </label>
+          <select
+            id={fieldId('barangay')}
+            className="ph-ap__select"
+            value={a.value.barangay?.code ?? ''}
+            disabled={disabled || a.barangayStatus !== 'ready'}
+            aria-busy={a.barangayStatus === 'loading'}
+            aria-describedby={
+              a.barangayStatus === 'loading' || a.barangayStatus === 'error'
+                ? fieldId('brgy-hint')
+                : undefined
+            }
+            onChange={(e) => a.selectBarangay(e.target.value || null)}
+          >
+            <option value="">
+              {a.barangayStatus === 'loading' ? 'Loading barangays…' : P.barangay}
+            </option>
+            {a.options.barangays.map((b) => (
+              <option key={b.code} value={b.code}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+          {(a.barangayStatus === 'loading' || a.barangayStatus === 'error') && (
+            <span id={fieldId('brgy-hint')} className="ph-ap__hint" role="status" aria-live="polite">
+              {a.barangayStatus === 'loading'
+                ? 'Loading barangays…'
+                : "Couldn't load barangays — barangay is optional, or reselect the city to retry."}
+            </span>
+          )}
+        </div>
+      )}
 
       {showZip && (
         <div className="ph-ap__field">

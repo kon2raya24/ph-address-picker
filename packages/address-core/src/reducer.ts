@@ -117,6 +117,16 @@ export function withZip(value: AddressValue, zip: string | null): AddressValue {
   return { ...value, zip: zip && zip.trim() ? zip.trim() : null };
 }
 
+export function withBarangay(
+  value: AddressValue,
+  code: string | null,
+  barangayOptions: Option[],
+): AddressValue {
+  if (!code) return { ...value, barangay: null };
+  const b = barangayOptions.find((o) => o.code === code);
+  return { ...value, barangay: b ? { code: b.code, name: b.name } : null };
+}
+
 export function fromInitial(init: InitialValue | undefined, zipPolicy: ZipPolicy): AddressValue {
   if (!init) return EMPTY_VALUE;
   let value: AddressValue = EMPTY_VALUE;

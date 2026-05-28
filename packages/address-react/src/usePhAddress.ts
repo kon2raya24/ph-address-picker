@@ -24,6 +24,7 @@ export interface UsePhAddressResult extends AddressState {
   selectRegion: (code: string | null) => void;
   selectProvince: (code: string | null) => void;
   selectCity: (code: string | null) => void;
+  selectBarangay: (code: string | null) => void;
   setZip: (zip: string | null) => void;
   reset: () => void;
 }
@@ -56,6 +57,7 @@ export function usePhAddress(opts: UsePhAddressOptions = {}): UsePhAddressResult
     selectRegion: store.selectRegion,
     selectProvince: store.selectProvince,
     selectCity: store.selectCity,
+    selectBarangay: store.selectBarangay,
     setZip: store.setZip,
     reset: store.reset,
   };

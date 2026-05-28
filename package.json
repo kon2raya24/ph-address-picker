@@ -6,15 +6,18 @@
   "workspaces": [
     "packages/address-core",
     "packages/address-react",
+    "packages/address-data",
     "examples/playground"
   ],
   "scripts": {
     "build:data": "node scripts/build-data.mjs",
+    "build:barangays": "node scripts/build-barangay-chunks.mjs",
     "build": "npm run build --workspace=@ph-dev-utils/address-core && npm run build --workspace=@ph-dev-utils/address-react",
     "test": "npm run test --workspace=@ph-dev-utils/address-core && npm run test --workspace=@ph-dev-utils/address-react"
   },
   "devDependencies": {
-    "@ph-dev-utils/postal": "^0.2.0"
+    "@ph-dev-utils/postal": "^0.2.0",
+    "@ph-dev-utils/psgc-barangays": "^0.1.0"
   },
   "license": "MIT"
 }

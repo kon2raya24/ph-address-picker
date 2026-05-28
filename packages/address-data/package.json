@@ -1,0 +1,19 @@
+{
+  "name": "@ph-dev-utils/address-data",
+  "version": "0.1.0",
+  "description": "Per-city PSGC barangay chunks for @ph-dev-utils/address-* pickers, served via CDN (jsDelivr). One small JSON file per city/municipality. Not a code dependency.",
+  "license": "MIT",
+  "files": [
+    "barangays",
+    "README.md"
+  ],
+  "keywords": [
+    "philippines",
+    "filipino",
+    "psgc",
+    "barangay",
+    "address",
+    "cdn",
+    "data"
+  ]
+}

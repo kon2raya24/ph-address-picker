@@ -47,4 +47,18 @@ describe('<PhAddressPicker>', () => {
     expect(screen.getByLabelText('City / Municipality')).toHaveValue('072217');
     expect(screen.getByLabelText('ZIP Code')).toHaveValue('6000');
   });
+
+  it('loads the barangay field via the fetcher when showBarangay is set', async () => {
+    const fetchBarangays = vi.fn(async () => [{ code: '072217001', name: 'Adlaon' }]);
+    const user = userEvent.setup();
+    render(<PhAddressPicker showBarangay fetchBarangays={fetchBarangays} />);
+
+    await user.selectOptions(screen.getByLabelText('Region'), '07');
+    await user.selectOptions(screen.getByLabelText('Province'), '0722');
+    await user.selectOptions(screen.getByLabelText('City / Municipality'), '072217');
+
+    expect(screen.getByLabelText('Barangay')).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Adlaon' })).toBeInTheDocument();
+    expect(fetchBarangays).toHaveBeenCalledWith('072217');
+  });
 });

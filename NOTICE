@@ -1,0 +1,14 @@
+ph-address-picker — data attribution
+=====================================
+
+Region / province / city data comes from @ph-dev-utils/core (PSA Q4 2024 PSGC).
+
+The bundled ZIP-by-city map (packages/address-core/data/zip-by-city.json) is
+derived from @ph-dev-utils/postal, whose ZIP data originates from GeoNames:
+
+  https://www.geonames.org — licensed under Creative Commons Attribution 4.0
+  (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+
+ZIP data is community-sourced (GeoNames) and reconciled against the PHLPost
+ZIP-code locator. It is NOT an official PHLPost feed — verify against PHLPost
+(https://phlpost.gov.ph) for authoritative, production-critical use.

@@ -1,0 +1,20 @@
+{
+  "name": "ph-address-picker",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Philippine cascading address picker (region/province/city/ZIP) for React, built on the @ph-dev-utils data packages.",
+  "workspaces": [
+    "packages/address-core",
+    "packages/address-react",
+    "examples/playground"
+  ],
+  "scripts": {
+    "build:data": "node scripts/build-data.mjs",
+    "build": "npm run build --workspace=@ph-dev-utils/address-core && npm run build --workspace=@ph-dev-utils/address-react",
+    "test": "npm run test --workspace=@ph-dev-utils/address-core && npm run test --workspace=@ph-dev-utils/address-react"
+  },
+  "devDependencies": {
+    "@ph-dev-utils/postal": "^0.2.0"
+  },
+  "license": "MIT"
+}

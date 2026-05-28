@@ -1,0 +1,57 @@
+{
+  "name": "@ph-dev-utils/address-react",
+  "version": "0.1.0",
+  "description": "React cascading Philippine address picker (region → province → city → ZIP). <PhAddressPicker> + usePhAddress(), built on @ph-dev-utils/address-core.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./theme.css": "./theme.css"
+  },
+  "files": [
+    "dist",
+    "theme.css",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "philippines",
+    "filipino",
+    "address",
+    "react",
+    "psgc",
+    "zip",
+    "form",
+    "component"
+  ],
+  "dependencies": {
+    "@ph-dev-utils/address-core": "^0.1.0"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "jsdom": "^24.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.5.0"
+  }
+}

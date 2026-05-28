@@ -1,0 +1,48 @@
+{
+  "name": "@ph-dev-utils/address-element",
+  "version": "0.1.0",
+  "description": "Framework-agnostic <ph-address-picker> Web Component — cascading Philippine address picker (region → province → city → barangay → ZIP). Works in Vue, Angular, Svelte, or plain HTML. Built on @ph-dev-utils/address-core.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["./dist/index.js", "*.css"],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./theme.css": "./theme.css"
+  },
+  "files": [
+    "dist",
+    "theme.css",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "philippines",
+    "filipino",
+    "address",
+    "web-component",
+    "custom-element",
+    "psgc",
+    "zip",
+    "vue",
+    "angular",
+    "svelte"
+  ],
+  "dependencies": {
+    "@ph-dev-utils/address-core": "^0.2.0"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.5.0"
+  }
+}

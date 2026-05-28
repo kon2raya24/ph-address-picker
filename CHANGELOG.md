@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-28
+
+### Added
+
+- **`@ph-dev-utils/address-element`** (v0.1.0) — a framework-agnostic **`<ph-address-picker>` Web Component** built on the headless `address-core`. Works in Vue / Angular / Svelte / plain HTML; auto-registers on import. Attributes `show-zip` / `show-barangay` / `zip-policy` / `region` / `province` / `city` / `zip` / `id-prefix` / `disabled` / `required`; emits a `ph-change` `CustomEvent` with the `AddressValue`. Light-DOM `.ph-ap*` markup + optional `theme.css`. Same NCR / independent-city / multi-ZIP / barangay handling as the React package.
+
+### Notes
+
+- The element is **client-side only** (`extends HTMLElement`); import it lazily on mount under SSR.
+- Tests: 6 vitest (jsdom custom-element). No change to `address-core` / `address-react` (the element depends on `address-core@^0.2.0`).
+
 ## [0.2.0] - 2026-05-28
 
 ### Added

@@ -24,7 +24,9 @@ function Checkout() {
 | Package | What |
 |---------|------|
 | [`@ph-dev-utils/address-react`](packages/address-react) | React `<PhAddressPicker>` + `usePhAddress()` hook |
-| [`@ph-dev-utils/address-core`](packages/address-core) | Headless, framework-agnostic store (no UI) — reuse to build Vue/web-component bindings |
+| [`@ph-dev-utils/address-element`](packages/address-element) | `<ph-address-picker>` Web Component (Vue / Angular / Svelte / vanilla) |
+| [`@ph-dev-utils/address-core`](packages/address-core) | Headless, framework-agnostic store (no UI) |
+| [`@ph-dev-utils/address-data`](packages/address-data) | Per-city barangay chunks for the CDN (not a code dep) |
 
 ## How it works
 

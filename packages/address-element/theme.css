@@ -1,0 +1,76 @@
+/*
+ * Optional default theme for <ph-address-picker>.
+ * Import it (`import '@ph-dev-utils/address-element/theme.css'`) or link it, for a
+ * styled picker; or skip it and target the .ph-ap* classes yourself. Recolor via
+ * the CSS custom properties below.
+ */
+.ph-ap {
+  --ph-ap-blue: #0038a8;
+  --ph-ap-red: #ce1126;
+  --ph-ap-border: #cbd5e1;
+  --ph-ap-text: #1e293b;
+  --ph-ap-muted: #64748b;
+  --ph-ap-radius: 8px;
+  --ph-ap-gap: 0.75rem;
+
+  display: grid;
+  gap: var(--ph-ap-gap);
+  color: var(--ph-ap-text);
+  font-family: inherit;
+}
+
+.ph-ap__field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.ph-ap__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ph-ap__select,
+.ph-ap__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.625rem;
+  font-size: 1rem;
+  color: var(--ph-ap-text);
+  background: #fff;
+  border: 1px solid var(--ph-ap-border);
+  border-radius: var(--ph-ap-radius);
+  appearance: auto;
+}
+
+.ph-ap__select:focus,
+.ph-ap__input:focus {
+  outline: none;
+  border-color: var(--ph-ap-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ph-ap-blue) 20%, transparent);
+}
+
+.ph-ap__select:disabled,
+.ph-ap__input:disabled {
+  background: #f1f5f9;
+  color: var(--ph-ap-muted);
+  cursor: not-allowed;
+}
+
+.ph-ap__zip {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ph-ap__input {
+  max-width: 7rem;
+}
+
+.ph-ap__zip-options {
+  max-width: 8rem;
+}
+
+.ph-ap__hint {
+  font-size: 0.75rem;
+  color: var(--ph-ap-muted);
+}

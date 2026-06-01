@@ -29,6 +29,7 @@ Importing the package auto-registers the `<ph-address-picker>` element.
 |-----------|---------|-------|
 | `show-zip` | `true` | Set `"false"` to hide the ZIP field |
 | `show-barangay` | `false` | Lazy-loads barangays per city from the jsDelivr CDN |
+| `searchable` | `false` | Type-to-filter combobox for the long lists (city/municipality + barangay) instead of a native `<select>`; region/province stay native. Arrow keys / Enter / Esc; order-independent matching (typing "Cebu City" finds "City of Cebu") |
 | `zip-policy` | `first` | `first` autofills a ZIP; `none` leaves it blank |
 | `region` / `province` / `city` / `zip` | — | Initial PSGC codes / ZIP (`city` alone hydrates the cascade) |
 | `id-prefix` | `ph-ap` | Prefix for field ids (label association) |

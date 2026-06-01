@@ -70,4 +70,47 @@ describe('<ph-address-picker>', () => {
     expect(sel(elx, 'city').value).toBe('072217');
     expect((elx.querySelector('#ph-ap-zip') as HTMLInputElement).value).toBe('6000');
   });
+
+  describe('searchable', () => {
+    it('renders the city field as a combobox and type-filters + selects by code', () => {
+      const elx = mount({ searchable: '' });
+      let detail: any = null;
+      elx.addEventListener('ph-change', (e) => {
+        detail = (e as CustomEvent).detail;
+      });
+
+      // region/province are still native selects
+      change(sel(elx, 'region'), '07');
+      change(sel(elx, 'province'), '0722');
+
+      const city = elx.querySelector('#ph-ap-city') as HTMLInputElement;
+      expect(city.tagName).toBe('INPUT');
+      expect(city.getAttribute('role')).toBe('combobox');
+
+      // open + type the common "Cebu City" form; PSA stores "City of Cebu"
+      city.dispatchEvent(new Event('focus'));
+      city.value = 'cebu city';
+      city.dispatchEvent(new Event('input', { bubbles: true }));
+
+      const listbox = elx.querySelector('#ph-ap-city-listbox') as HTMLElement;
+      const match = [...listbox.querySelectorAll('[role="option"]')].find(
+        (o) => o.textContent === 'City of Cebu',
+      ) as HTMLElement;
+      expect(match).toBeTruthy();
+
+      // mousedown selects (keeps focus)
+      match.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+      expect(detail.city.code).toBe('072217');
+      expect(detail.zip).toBe('6000');
+      expect(city.value).toBe('City of Cebu');
+    });
+
+    it('hydrates the combobox input from the city attribute', () => {
+      const elx = mount({ searchable: '', city: '072217' });
+      const city = elx.querySelector('#ph-ap-city') as HTMLInputElement;
+      expect(city.tagName).toBe('INPUT');
+      expect(city.value).toBe('City of Cebu');
+    });
+  });
 });

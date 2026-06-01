@@ -65,11 +65,212 @@ function fillSelect(
 }
 
 /**
+ * Vanilla type-to-filter combobox (WAI-ARIA combobox + listbox) used for the
+ * long lists (city / barangay) when `searchable` is set. Selection is always by
+ * PSGC `code`; the input shows the option `name`. Token-AND filtering so typing
+ * the common "Cebu City" matches the PSA-stored "City of Cebu".
+ */
+class ComboboxControl {
+  readonly wrapper: HTMLDivElement;
+  readonly input: HTMLInputElement;
+  private readonly listbox: HTMLUListElement;
+  private options: readonly Option[] = [];
+  private value: string | null = null;
+  private open = false;
+  private dirty = false;
+  private activeIndex = -1;
+  private filtered: readonly Option[] = [];
+  private readonly emptyLabel: string;
+  private readonly onSelect: (code: string | null) => void;
+
+  constructor(id: string, placeholder: string, emptyLabel: string, onSelect: (code: string | null) => void) {
+    this.emptyLabel = emptyLabel;
+    this.onSelect = onSelect;
+
+    this.wrapper = el('div', 'ph-ap__combobox');
+    this.input = el('input', 'ph-ap__input ph-ap__combobox-input');
+    this.input.id = id;
+    this.input.type = 'text';
+    this.input.autocomplete = 'off';
+    this.input.setAttribute('role', 'combobox');
+    this.input.setAttribute('aria-autocomplete', 'list');
+    this.input.setAttribute('aria-expanded', 'false');
+    this.input.setAttribute('aria-controls', `${id}-listbox`);
+    this.input.placeholder = placeholder;
+
+    this.listbox = el('ul', 'ph-ap__listbox');
+    this.listbox.id = `${id}-listbox`;
+    this.listbox.setAttribute('role', 'listbox');
+    this.listbox.style.display = 'none';
+
+    this.wrapper.appendChild(this.input);
+    this.wrapper.appendChild(this.listbox);
+
+    this.input.addEventListener('focus', () => this.openList());
+    this.input.addEventListener('mousedown', () => {
+      if (!this.open) this.openList();
+    });
+    this.input.addEventListener('input', () => {
+      this.dirty = true;
+      this.open = true;
+      this.activeIndex = 0;
+      this.renderList();
+    });
+    this.input.addEventListener('keydown', (e) => this.onKeyDown(e));
+    this.input.addEventListener('blur', () => this.close(true));
+  }
+
+  /** Called from the element's render() on every store change. */
+  setData(options: readonly Option[], value: string | null, disabled: boolean, placeholder: string): void {
+    this.options = options;
+    this.value = value;
+    this.input.disabled = disabled;
+    this.input.placeholder = placeholder;
+    // Don't clobber the field while the user is actively browsing/typing.
+    if (this.open) {
+      this.renderList();
+    } else {
+      this.input.value = this.selectedName();
+      this.dirty = false;
+    }
+  }
+
+  setRequired(required: boolean): void {
+    this.input.required = required;
+  }
+
+  private selectedName(): string {
+    if (!this.value) return '';
+    const found = this.options.find((o) => o.code === this.value);
+    return found ? found.name : '';
+  }
+
+  private computeFiltered(): readonly Option[] {
+    const tokens = this.input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (this.open && this.dirty && tokens.length) {
+      return this.options.filter((o) => {
+        const hay = o.name.toLowerCase();
+        return tokens.every((t) => hay.includes(t));
+      });
+    }
+    return this.options;
+  }
+
+  private openList(): void {
+    if (this.input.disabled) return;
+    this.open = true;
+    this.dirty = false;
+    const i = this.value ? this.options.findIndex((o) => o.code === this.value) : 0;
+    this.activeIndex = i >= 0 ? i : 0;
+    this.renderList();
+  }
+
+  private close(revert: boolean): void {
+    this.open = false;
+    this.activeIndex = -1;
+    if (revert) {
+      this.input.value = this.selectedName();
+      this.dirty = false;
+    }
+    this.listbox.style.display = 'none';
+    this.input.setAttribute('aria-expanded', 'false');
+    this.input.removeAttribute('aria-activedescendant');
+  }
+
+  private choose(opt: Option): void {
+    this.onSelect(opt.code);
+    this.input.value = opt.name;
+    this.dirty = false;
+    this.close(false);
+  }
+
+  private onKeyDown(e: KeyboardEvent): void {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!this.open) return this.openList();
+        this.activeIndex = Math.min(this.filtered.length - 1, this.activeIndex + 1);
+        this.highlight();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (!this.open) return this.openList();
+        this.activeIndex = Math.max(0, this.activeIndex - 1);
+        this.highlight();
+        break;
+      case 'Enter':
+        if (this.open && this.activeIndex >= 0 && this.filtered[this.activeIndex]) {
+          e.preventDefault();
+          this.choose(this.filtered[this.activeIndex]);
+        }
+        break;
+      case 'Escape':
+        if (this.open) {
+          e.preventDefault();
+          this.close(true);
+        }
+        break;
+      case 'Tab':
+        this.close(true);
+        break;
+    }
+  }
+
+  private renderList(): void {
+    this.filtered = this.computeFiltered();
+    this.listbox.textContent = '';
+    const id = this.input.id;
+    if (this.filtered.length === 0) {
+      const li = el('li', 'ph-ap__option ph-ap__option--empty');
+      li.setAttribute('role', 'presentation');
+      li.textContent = this.emptyLabel;
+      this.listbox.appendChild(li);
+    } else {
+      this.filtered.forEach((o, idx) => {
+        const li = el('li', `ph-ap__option${idx === this.activeIndex ? ' ph-ap__option--active' : ''}`);
+        li.id = `${id}-opt-${o.code}`;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', o.code === this.value ? 'true' : 'false');
+        li.textContent = o.name;
+        // mousedown (not click) so selection lands before the input blurs.
+        li.addEventListener('mousedown', (ev) => {
+          ev.preventDefault();
+          this.choose(o);
+        });
+        this.listbox.appendChild(li);
+      });
+    }
+    this.listbox.style.display = '';
+    this.input.setAttribute('aria-expanded', 'true');
+    this.highlight();
+  }
+
+  private highlight(): void {
+    const active = this.filtered[this.activeIndex];
+    const children = this.listbox.children;
+    for (let i = 0; i < children.length; i++) {
+      const li = children[i] as HTMLElement;
+      if (li.getAttribute('role') !== 'option') continue;
+      li.classList.toggle('ph-ap__option--active', this.filtered[i]?.code === active?.code && i === this.activeIndex);
+    }
+    if (this.open && active) {
+      this.input.setAttribute('aria-activedescendant', `${this.input.id}-opt-${active.code}`);
+      const node = this.listbox.children[this.activeIndex] as HTMLElement | undefined;
+      if (node && typeof node.scrollIntoView === 'function') node.scrollIntoView({ block: 'nearest' });
+    } else {
+      this.input.removeAttribute('aria-activedescendant');
+    }
+  }
+}
+
+/**
  * `<ph-address-picker>` — framework-agnostic cascading Philippine address picker.
  *
  * Attributes: `show-zip` (default true; set `"false"` to hide), `show-barangay`
- * (default false), `zip-policy` (`first` | `none`), `region` / `province` / `city`
- * / `zip` (initial PSGC codes / ZIP), `id-prefix`, `disabled`, `required`.
+ * (default false), `searchable` (default false — type-to-filter combobox for the
+ * city/barangay lists instead of a native `<select>`), `zip-policy`
+ * (`first` | `none`), `region` / `province` / `city` / `zip` (initial PSGC codes
+ * / ZIP), `id-prefix`, `disabled`, `required`.
  *
  * Emits a `ph-change` CustomEvent whose `detail` is the {@link AddressValue}.
  */
@@ -82,9 +283,11 @@ export class PhAddressPickerElement extends HTMLElement {
   private regionSel!: HTMLSelectElement;
   private provinceField!: HTMLDivElement;
   private provinceSel!: HTMLSelectElement;
-  private citySel!: HTMLSelectElement;
+  private citySel: HTMLSelectElement | null = null;
+  private cityCombo: ComboboxControl | null = null;
   private barangayField: HTMLDivElement | null = null;
   private barangaySel: HTMLSelectElement | null = null;
+  private barangayCombo: ComboboxControl | null = null;
   private barangayHint: HTMLElement | null = null;
   private zipField: HTMLDivElement | null = null;
   private zipInput: HTMLInputElement | null = null;
@@ -95,6 +298,9 @@ export class PhAddressPickerElement extends HTMLElement {
   }
   private get showBarangay(): boolean {
     return this.hasAttribute('show-barangay') && this.getAttribute('show-barangay') !== 'false';
+  }
+  private get searchable(): boolean {
+    return this.hasAttribute('searchable') && this.getAttribute('searchable') !== 'false';
   }
   private get idPrefix(): string {
     return this.getAttribute('id-prefix') || 'ph-ap';
@@ -157,23 +363,43 @@ export class PhAddressPickerElement extends HTMLElement {
     root.appendChild(province.wrapper);
 
     const city = field(id, 'city', LABELS.city);
-    this.citySel = el('select', 'ph-ap__select');
-    this.citySel.id = `${id}-city`;
-    this.citySel.addEventListener('change', () =>
-      this.store!.selectCity(this.citySel.value || null),
-    );
-    city.wrapper.appendChild(this.citySel);
+    if (this.searchable) {
+      this.cityCombo = new ComboboxControl(
+        `${id}-city`,
+        PLACEHOLDERS.city,
+        'No matching city / municipality',
+        (code) => this.store!.selectCity(code),
+      );
+      city.wrapper.appendChild(this.cityCombo.wrapper);
+    } else {
+      this.citySel = el('select', 'ph-ap__select');
+      this.citySel.id = `${id}-city`;
+      this.citySel.addEventListener('change', () =>
+        this.store!.selectCity(this.citySel!.value || null),
+      );
+      city.wrapper.appendChild(this.citySel);
+    }
     root.appendChild(city.wrapper);
 
     if (this.showBarangay) {
       const brgy = field(id, 'barangay', LABELS.barangay);
       this.barangayField = brgy.wrapper;
-      this.barangaySel = el('select', 'ph-ap__select');
-      this.barangaySel.id = `${id}-barangay`;
-      this.barangaySel.addEventListener('change', () =>
-        this.store!.selectBarangay(this.barangaySel!.value || null),
-      );
-      brgy.wrapper.appendChild(this.barangaySel);
+      if (this.searchable) {
+        this.barangayCombo = new ComboboxControl(
+          `${id}-barangay`,
+          PLACEHOLDERS.barangay,
+          'No matching barangay',
+          (code) => this.store!.selectBarangay(code),
+        );
+        brgy.wrapper.appendChild(this.barangayCombo.wrapper);
+      } else {
+        this.barangaySel = el('select', 'ph-ap__select');
+        this.barangaySel.id = `${id}-barangay`;
+        this.barangaySel.addEventListener('change', () =>
+          this.store!.selectBarangay(this.barangaySel!.value || null),
+        );
+        brgy.wrapper.appendChild(this.barangaySel);
+      }
       this.barangayHint = el('span', 'ph-ap__hint');
       this.barangayHint.id = `${id}-brgy-hint`;
       this.barangayHint.setAttribute('role', 'status');
@@ -242,25 +468,25 @@ export class PhAddressPickerElement extends HTMLElement {
       disabled || !value.region,
     );
 
-    fillSelect(
-      this.citySel,
-      PLACEHOLDERS.city,
-      options.cities as CityOption[],
-      value.city?.code ?? null,
-      disabled || options.cities.length === 0,
-    );
-    this.citySel.required = this.isRequired;
+    const cityDisabled = disabled || options.cities.length === 0;
+    if (this.cityCombo) {
+      this.cityCombo.setData(options.cities as CityOption[], value.city?.code ?? null, cityDisabled, PLACEHOLDERS.city);
+      this.cityCombo.setRequired(this.isRequired);
+    } else if (this.citySel) {
+      fillSelect(this.citySel, PLACEHOLDERS.city, options.cities as CityOption[], value.city?.code ?? null, cityDisabled);
+      this.citySel.required = this.isRequired;
+    }
 
-    if (this.barangaySel && this.barangayHint) {
+    if (this.barangayHint && (this.barangaySel || this.barangayCombo)) {
       const loading = state.barangayStatus === 'loading';
-      fillSelect(
-        this.barangaySel,
-        loading ? 'Loading barangays…' : PLACEHOLDERS.barangay,
-        options.barangays,
-        value.barangay?.code ?? null,
-        disabled || state.barangayStatus !== 'ready',
-      );
-      this.barangaySel.setAttribute('aria-busy', loading ? 'true' : 'false');
+      const brgyPlaceholder = loading ? 'Loading barangays…' : PLACEHOLDERS.barangay;
+      const brgyDisabled = disabled || state.barangayStatus !== 'ready';
+      if (this.barangayCombo) {
+        this.barangayCombo.setData(options.barangays, value.barangay?.code ?? null, brgyDisabled, brgyPlaceholder);
+      } else if (this.barangaySel) {
+        fillSelect(this.barangaySel, brgyPlaceholder, options.barangays, value.barangay?.code ?? null, brgyDisabled);
+        this.barangaySel.setAttribute('aria-busy', loading ? 'true' : 'false');
+      }
       if (loading) {
         this.barangayHint.textContent = 'Loading barangays…';
         this.barangayHint.style.display = '';

@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-01
+
+### Added
+
+- **`@ph-dev-utils/address-element`** (0.2.0): **`searchable`** attribute — parity with `address-react` v0.3. Set `searchable` on `<ph-address-picker>` and the city/municipality + barangay fields become a type-to-filter combobox instead of a native `<select>`; region/province stay native (always short). Same accessible WAI-ARIA combobox + listbox behavior, implemented as a dependency-free vanilla `ComboboxControl` (arrow keys, Enter, Esc, blur-revert, `scrollIntoView` feature-detected) with the same **token-AND, order-independent filter** (typing "Cebu City" finds the PSA-stored "City of Cebu"). Selection always resolves by PSGC code. `theme.css` gains the `.ph-ap__combobox` / `.ph-ap__listbox` / `.ph-ap__option` rules.
+
+### Notes
+
+- `searchable` is **opt-in** (default false) — existing consumers render native `<select>` exactly as before. `address-core` / `address-react` are unchanged.
+- Tests: +2 vitest (jsdom) — combobox render + "Cebu City"→code select, and attribute hydration.
+
 ## [0.4.0] - 2026-06-01
 
 ### Added

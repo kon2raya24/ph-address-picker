@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { usePhAddress } from './usePhAddress.js';
+import { Combobox } from './Combobox.js';
 import { createJsDelivrFetcher } from '@ph-dev-utils/address-core';
 import type { AddressValue, Fetcher, InitialValue, ZipPolicy } from '@ph-dev-utils/address-core';
 
@@ -20,6 +21,13 @@ export interface PhAddressPickerProps {
   showZip?: boolean;
   /** Show the barangay field (lazy-loads per city). Default false. */
   showBarangay?: boolean;
+  /**
+   * Use a type-to-filter combobox for the long lists (city/municipality and
+   * barangay) instead of a native `<select>`. Default false. Region and
+   * province stay native `<select>` (they are always short). Note: a combobox
+   * trades the native mobile picker for searchability.
+   */
+  searchable?: boolean;
   /** Override the barangay fetcher. Defaults to the jsDelivr CDN when `showBarangay` is on. */
   fetchBarangays?: Fetcher;
   labels?: PhAddressLabels;
@@ -54,6 +62,7 @@ export function PhAddressPicker(props: PhAddressPickerProps) {
     zipPolicy,
     showZip = true,
     showBarangay = false,
+    searchable = false,
     fetchBarangays,
     labels,
     placeholders,
@@ -124,21 +133,34 @@ export function PhAddressPicker(props: PhAddressPickerProps) {
         <label className="ph-ap__label" htmlFor={fieldId('city')}>
           {L.city}
         </label>
-        <select
-          id={fieldId('city')}
-          className="ph-ap__select"
-          value={a.value.city?.code ?? ''}
-          disabled={disabled || a.options.cities.length === 0}
-          required={required}
-          onChange={(e) => a.selectCity(e.target.value || null)}
-        >
-          <option value="">{P.city}</option>
-          {a.options.cities.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        {searchable ? (
+          <Combobox
+            id={fieldId('city')}
+            options={a.options.cities}
+            value={a.value.city?.code ?? null}
+            onSelect={(code) => a.selectCity(code)}
+            placeholder={P.city}
+            disabled={disabled || a.options.cities.length === 0}
+            required={required}
+            emptyLabel="No matching city / municipality"
+          />
+        ) : (
+          <select
+            id={fieldId('city')}
+            className="ph-ap__select"
+            value={a.value.city?.code ?? ''}
+            disabled={disabled || a.options.cities.length === 0}
+            required={required}
+            onChange={(e) => a.selectCity(e.target.value || null)}
+          >
+            <option value="">{P.city}</option>
+            {a.options.cities.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {showBarangay && (
@@ -146,28 +168,40 @@ export function PhAddressPicker(props: PhAddressPickerProps) {
           <label className="ph-ap__label" htmlFor={fieldId('barangay')}>
             {L.barangay}
           </label>
-          <select
-            id={fieldId('barangay')}
-            className="ph-ap__select"
-            value={a.value.barangay?.code ?? ''}
-            disabled={disabled || a.barangayStatus !== 'ready'}
-            aria-busy={a.barangayStatus === 'loading'}
-            aria-describedby={
-              a.barangayStatus === 'loading' || a.barangayStatus === 'error'
-                ? fieldId('brgy-hint')
-                : undefined
-            }
-            onChange={(e) => a.selectBarangay(e.target.value || null)}
-          >
-            <option value="">
-              {a.barangayStatus === 'loading' ? 'Loading barangays…' : P.barangay}
-            </option>
-            {a.options.barangays.map((b) => (
-              <option key={b.code} value={b.code}>
-                {b.name}
+          {searchable ? (
+            <Combobox
+              id={fieldId('barangay')}
+              options={a.options.barangays}
+              value={a.value.barangay?.code ?? null}
+              onSelect={(code) => a.selectBarangay(code)}
+              placeholder={a.barangayStatus === 'loading' ? 'Loading barangays…' : P.barangay}
+              disabled={disabled || a.barangayStatus !== 'ready'}
+              emptyLabel="No matching barangay"
+            />
+          ) : (
+            <select
+              id={fieldId('barangay')}
+              className="ph-ap__select"
+              value={a.value.barangay?.code ?? ''}
+              disabled={disabled || a.barangayStatus !== 'ready'}
+              aria-busy={a.barangayStatus === 'loading'}
+              aria-describedby={
+                a.barangayStatus === 'loading' || a.barangayStatus === 'error'
+                  ? fieldId('brgy-hint')
+                  : undefined
+              }
+              onChange={(e) => a.selectBarangay(e.target.value || null)}
+            >
+              <option value="">
+                {a.barangayStatus === 'loading' ? 'Loading barangays…' : P.barangay}
               </option>
-            ))}
-          </select>
+              {a.options.barangays.map((b) => (
+                <option key={b.code} value={b.code}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          )}
           {(a.barangayStatus === 'loading' || a.barangayStatus === 'error') && (
             <span id={fieldId('brgy-hint')} className="ph-ap__hint" role="status" aria-live="polite">
               {a.barangayStatus === 'loading'

@@ -61,4 +61,65 @@ describe('<PhAddressPicker>', () => {
     expect(await screen.findByRole('option', { name: 'Adlaon' })).toBeInTheDocument();
     expect(fetchBarangays).toHaveBeenCalledWith('072217');
   });
+
+  describe('searchable combobox', () => {
+    it('renders the city field as a combobox, type-filters, and selects by code on click', async () => {
+      const onChange = vi.fn();
+      const user = userEvent.setup();
+      render(<PhAddressPicker searchable onChange={onChange} />);
+
+      // Region/province stay native selects even when searchable.
+      await user.selectOptions(screen.getByLabelText('Region'), '07');
+      await user.selectOptions(screen.getByLabelText('Province'), '0722');
+
+      const city = screen.getByLabelText('City / Municipality');
+      expect(city).toHaveAttribute('role', 'combobox');
+
+      await user.click(city);
+      // User types the common "Cebu City" form; PSA stores "City of Cebu".
+      // Token-AND matching bridges the word-order difference.
+      await user.type(city, 'cebu city');
+      const opt = await screen.findByRole('option', { name: 'City of Cebu' });
+      await user.click(opt);
+
+      const last = onChange.mock.calls.at(-1)![0];
+      expect(last.city.code).toBe('072217');
+      expect(last.zip).toBe('6000');
+      expect(city).toHaveValue('City of Cebu');
+    });
+
+    it('selects with keyboard (ArrowDown + Enter) and resolves by code', async () => {
+      const onChange = vi.fn();
+      const user = userEvent.setup();
+      render(<PhAddressPicker searchable onChange={onChange} />);
+
+      await user.selectOptions(screen.getByLabelText('Region'), '07');
+      await user.selectOptions(screen.getByLabelText('Province'), '0722');
+
+      const city = screen.getByLabelText('City / Municipality');
+      await user.click(city);
+      await user.type(city, 'city of cebu');
+      await user.keyboard('{ArrowDown}{Enter}');
+
+      const last = onChange.mock.calls.at(-1)![0];
+      expect(last.city.code).toBe('072217');
+      expect(city).toHaveValue('City of Cebu');
+    });
+
+    it('reverts to the selected name when blurred with a partial query', async () => {
+      const user = userEvent.setup();
+      render(<PhAddressPicker searchable defaultValue={{ cityCode: '072217' }} />);
+
+      const city = screen.getByLabelText('City / Municipality');
+      expect(city).toHaveValue('City of Cebu'); // hydrated
+
+      await user.click(city);
+      await user.clear(city);
+      await user.type(city, 'zzz no match');
+      expect(await screen.findByText('No matching city / municipality')).toBeInTheDocument();
+
+      await user.tab(); // blur without choosing
+      expect(city).toHaveValue('City of Cebu'); // reverted, selection intact
+    });
+  });
 });

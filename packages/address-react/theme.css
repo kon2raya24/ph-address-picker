@@ -74,3 +74,48 @@
   font-size: 0.75rem;
   color: var(--ph-ap-muted);
 }
+
+/* Type-to-filter combobox (searchable city / barangay) */
+.ph-ap__combobox {
+  position: relative;
+}
+
+.ph-ap__combobox-input {
+  max-width: none;
+}
+
+.ph-ap__listbox {
+  position: absolute;
+  z-index: 20;
+  inset-inline: 0;
+  top: calc(100% + 2px);
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  max-height: 16rem;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--ph-ap-border);
+  border-radius: var(--ph-ap-radius);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.ph-ap__option {
+  padding: 0.4rem 0.5rem;
+  border-radius: calc(var(--ph-ap-radius) - 4px);
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.ph-ap__option--active {
+  background: color-mix(in srgb, var(--ph-ap-blue) 12%, transparent);
+}
+
+.ph-ap__option[aria-selected='true'] {
+  font-weight: 600;
+}
+
+.ph-ap__option--empty {
+  color: var(--ph-ap-muted);
+  cursor: default;
+}

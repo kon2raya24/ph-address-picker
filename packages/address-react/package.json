@@ -1,6 +1,6 @@
 {
   "name": "@ph-dev-utils/address-react",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "React cascading Philippine address picker (region → province → city → ZIP). <PhAddressPicker> + usePhAddress(), built on @ph-dev-utils/address-core.",
   "license": "MIT",
   "type": "module",

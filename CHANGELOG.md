@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-01
+
+### Added
+
+- **`@ph-dev-utils/address-react`** (0.3.0): **`searchable`** prop — a type-to-filter combobox for the two long lists (city/municipality and barangay) in place of the native `<select>`. A single province can hold 50+ municipalities (Cebu alone has 53), and a city can have 100+ barangays, so scrolling a native dropdown is painful; the combobox lets you type to narrow. Accessible WAI-ARIA combobox + listbox: arrow keys move the active option, Enter selects, Esc reverts, blur restores the prior selection — selection is **always resolved by PSGC `code`**, never by typed text. Region and province stay native `<select>` (always short). New standalone `Combobox` export (+ `ComboboxProps`) for reuse. Theme covers `.ph-ap__combobox` / `.ph-ap__listbox` / `.ph-ap__option`.
+
+### Notes
+
+- `searchable` is **opt-in** (default false) — existing consumers render native `<select>` exactly as before, so this is purely additive. A combobox trades the native mobile picker wheel for searchability; leave it off for short lists on mobile-first forms.
+- SSR-safe: no `window`/DOM access at module load (the combobox's effects run client-side only); selection logic stays in the headless `address-core` store. `scrollIntoView` is feature-detected before use.
+- Tests: +3 vitest (react) covering click-select, keyboard ArrowDown+Enter select, and blur-revert with a no-match query. No change to `address-core` or `address-element`.
+
 ## [0.3.0] - 2026-05-28
 
 ### Added

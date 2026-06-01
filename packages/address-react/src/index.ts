@@ -1,5 +1,7 @@
 export { PhAddressPicker } from './PhAddressPicker.js';
 export type { PhAddressPickerProps, PhAddressLabels } from './PhAddressPicker.js';
+export { Combobox } from './Combobox.js';
+export type { ComboboxProps } from './Combobox.js';
 export { usePhAddress } from './usePhAddress.js';
 export type { UsePhAddressOptions, UsePhAddressResult } from './usePhAddress.js';
 export type {

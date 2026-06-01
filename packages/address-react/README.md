@@ -30,6 +30,7 @@ import '@ph-dev-utils/address-react/theme.css'; // optional styled preset
 | `zipPolicy` | `'first' \| 'none'` | `'first'` | Autofill first candidate ZIP, or leave blank |
 | `showZip` | `boolean` | `true` | Render the ZIP field |
 | `showBarangay` | `boolean` | `false` | Render the barangay field (lazy-loads per city from jsDelivr) |
+| `searchable` | `boolean` | `false` | Type-to-filter combobox for the long lists (city/municipality + barangay) instead of a native `<select>` — a province can hold 50+ municipalities |
 | `fetchBarangays` | `(cityMunCode) => Promise<{code,name}[]>` | jsDelivr | Override the barangay source (self-host / mirror) |
 | `labels` / `placeholders` | `{ region?, province?, city?, barangay?, zip? }` | English | For i18n / Tagalog |
 | `disabled` `required` `id` `className` | — | — | Standard form props |
@@ -58,9 +59,17 @@ const { value, options, zipAmbiguous, selectRegion, selectProvince, selectCity, 
   = usePhAddress({ onChange, defaultValue });
 ```
 
+### Searchable (typeahead) fields
+
+```tsx
+<PhAddressPicker searchable />
+```
+
+`searchable` swaps the **city/municipality** and **barangay** fields for an accessible type-to-filter combobox (WAI-ARIA combobox + listbox: arrow keys, Enter to select, Esc to revert, selection always resolved by PSGC code). Region and province stay native `<select>` since they are always short. The standalone `Combobox` is also exported if you want it elsewhere. Note: a combobox trades the native mobile picker wheel for searchability — leave it off (the default) if your audience is mostly mobile and your lists are short.
+
 ## Styling
 
-Ships **unstyled** with `.ph-ap*` class names. Import `@ph-dev-utils/address-react/theme.css` for a default PH-themed look, or target the classes yourself. The theme is recolorable via `--ph-ap-*` CSS custom properties. SSR-safe (`useSyncExternalStore`, no `window`/`fetch` at import).
+Ships **unstyled** with `.ph-ap*` class names. Import `@ph-dev-utils/address-react/theme.css` for a default PH-themed look, or target the classes yourself. The theme is recolorable via `--ph-ap-*` CSS custom properties. SSR-safe (`useSyncExternalStore`, no `window`/`fetch` at import). The theme covers the searchable combobox (`.ph-ap__combobox`, `.ph-ap__listbox`, `.ph-ap__option`).
 
 ## Notes
 
